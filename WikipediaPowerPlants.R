@@ -105,7 +105,5 @@ if (length(dbListTables(db)) == 0){
   mergedData = merge(oldData, data, by="pageID")
   # find cases where the recent data queried from DBpedia has a higher revision number that what we have
   locs = which(mergedData$revisionID.x < mergedData$revisionID.y)
-  
-  
-  
+
 }
