@@ -49,6 +49,9 @@ def queryDBpedia():
 
 #### !!!!! This assumes that only a single page is returned in the API response !!!! #####
 # you could be smart and group multiple page requests into one API call
+# This function returns a dictionary for a single row in the db table 
+# Dealing with multiple pages would require changing the data structure returned
+# and updating the calling function to use something like cursor.executemany
 def parseAPIResponse(filePath):
     tree = etree.parse(filePath)
     # check what's in the xml file:     
