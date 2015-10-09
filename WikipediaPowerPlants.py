@@ -91,9 +91,10 @@ def downloadDataAndInsertIntoDatabase(pageID, cursor, overwrite=False):
     # dump the data as a row in the database table
     if articleData != 0: # make sure that we have valid data
         # if overwrite == True, then want to overwrite the old row in the database
-        if overwrite == True:
-            #print "deleting old values"
-            cursor.execute("DELETE FROM PowerPlantArticles WHERE pageID = " + str(articleData['pageID']) + " AND language = '" + articleData['language'] + "'")
+        #if overwrite == True:
+        #print "deleting old values"
+        # always delete before inserting
+        cursor.execute("DELETE FROM PowerPlantArticles WHERE pageID = " + str(articleData['pageID']) + " AND language = '" + articleData['language'] + "'")
         cursor.execute("INSERT INTO PowerPlantArticles VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [articleData['pageID'], articleData['revisionID'], articleData['title'], articleData['language'], articleData['timeStamp'], articleData['latitude'], articleData['longitude'], articleData['pageText']])
 
 
@@ -144,3 +145,9 @@ def main():
             
 
 main()
+
+##### SQL queries for debugging
+# Check for duplicate entries per pageID - setting up a primary key based on pageID and language would be a smart idea.
+#SELECT pageID, COUNT(*) c FROM PowerPlantArticles GROUP BY pageID HAVING c > 1;
+# see what's going on with a single pageID
+#select * FROM PowerPlantArticles WHERE pageID=42880740;
