@@ -4,16 +4,23 @@ import sqlite3 as lite
 import os
 import sys
 import urllib2
+from urllib2 import quote
 from lxml import etree
 from lxml.etree import tostring
 from SPARQLWrapper import SPARQLWrapper, JSON
 
-def createWikipediaAPIRequestURL( pageID ):
-  return "https://en.wikipedia.org/w/api.php?action=query&pageids=" + str(pageID) + "&prop=coordinates|revisions|langlinks&rvprop=ids|timestamp|user|comment|content&format=xml&redirects"
+# these are all the bits we want to grab when getting information about particular pages
+def getAPIRequestProperties():
+    return "&prop=coordinates|revisions|langlinks&rvprop=ids|timestamp|user|comment|content&format=xml&redirects"
 
+def createWikipediaAPIRequestURLForPageID(pageID, language="en"):
+    return "https://" + language + ".wikipedia.org/w/api.php?action=query&pageids=" + str(pageID) + getAPIRequestProperties()
+
+def createWikipediaAPIRequestURLForTitle(title, language="en"):
+    return "https://" + language + ".wikipedia.org/w/api.php?action=query&titles=" + title + getAPIRequestProperties()
 
 def downloadWikipediaAPIResponseData(pageID, language="en", overwrite=False):
-    exportURL = createWikipediaAPIRequestURL(pageID)
+    exportURL = createWikipediaAPIRequestURLForPageID(pageID)
     destfile = "./API_Responses/" + language + "/" + str(pageID) + ".xml"
     if os.path.isfile(destfile) == False or overwrite == True:
         print destfile
@@ -53,7 +60,9 @@ def queryDBpedia():
 # Dealing with multiple pages would require changing the data structure returned
 # and updating the calling function to use something like cursor.executemany
 def parseAPIResponse(filePath):
-    tree = etree.parse(filePath)
+    
+    utf8_parser = etree.XMLParser(encoding='utf-8')    
+    tree = etree.parse(filePath, parser=utf8_parser)
     # check what's in the xml file:     
     #tostring(tree)
 
@@ -75,11 +84,28 @@ def parseAPIResponse(filePath):
             lat = float('nan')
             lon = float('nan')
             
-            
         pageText = tree.xpath('//revisions/rev/text()')[0]
         language = "en"      
         timeStamp = tree.xpath('//revisions/rev/@timestamp')[0]
         title = tree.xpath('//@title')[0]
+
+        langlinks = tree.xpath('//langlinks/ll')
+        for langlink in langlinks:
+            language = langlink.xpath('@lang')[0]
+            titleOtherLang = langlink.text
+            # go from unicode to URL encoding
+            titleOtherLang = quote(titleOtherLang.encode('utf-8'))
+
+            # try to download this page if we don't have it already
+            createWikipediaAPIRequestURLForTitle(titleOtherLang, language)
+            
+            # TODO set up code to download - this issue is that files are saved according
+            # to pageID.  With the language links, we don't have the pageID yet, but we have the titles            
+            # At this point, we don't know the latest revision of the page either, 
+            # should just overwrite whatever we have since we have to look at the page anyway.
+            # This really should be thought through a bit more
+            # We can also just ping the API to get the latest revs for all the non-english pages
+            # this would be quite efficient and could be done in blocks of pageIDs
     
         return {'pageID':pageID, 'revisionID':revisionID, 'title':title, 'language':language, 'timeStamp':timeStamp, 'latitude':lat, 'longitude':lon, 'pageText':pageText}
     else:
