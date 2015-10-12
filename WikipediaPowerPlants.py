@@ -91,13 +91,13 @@ def parseAPIResponse(filePath):
 
         langlinks = tree.xpath('//langlinks/ll')
         for langlink in langlinks:
-            language = langlink.xpath('@lang')[0]
+            otherLanguage = langlink.xpath('@lang')[0]
             titleOtherLang = langlink.text
             # go from unicode to URL encoding
             titleOtherLang = quote(titleOtherLang.encode('utf-8'))
 
             # try to download this page if we don't have it already
-            createWikipediaAPIRequestURLForTitle(titleOtherLang, language)
+            createWikipediaAPIRequestURLForTitle(titleOtherLang, otherLanguage)
             
             # TODO set up code to download - this issue is that files are saved according
             # to pageID.  With the language links, we don't have the pageID yet, but we have the titles            
