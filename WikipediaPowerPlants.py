@@ -123,13 +123,16 @@ def downloadDataAndInsertIntoDatabase(pageID, cursor, overwrite=False):
         #if overwrite == True:
         #print "deleting old values"
         # always delete before inserting
-        cursor.execute("DELETE FROM PowerPlantArticles WHERE pageID = " + str(articleData['pageID']) + " AND language = '" + articleData['language'] + "'")
-        cursor.execute("INSERT INTO PowerPlantArticles VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [articleData['pageID'], articleData['revisionID'], articleData['title'], articleData['language'], articleData['timeStamp'], articleData['latitude'], articleData['longitude'], articleData['pageText']])
-
+    
+        if articleData['pageID'] == pageID:
+            print filePath
+            cursor.execute("DELETE FROM PowerPlantArticles WHERE pageID = " + str(articleData['pageID']) + " AND language = '" + articleData['language'] + "'")
+            cursor.execute("INSERT INTO PowerPlantArticles VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [articleData['pageID'], articleData['revisionID'], articleData['title'], articleData['language'], articleData['timeStamp'], articleData['latitude'], articleData['longitude'], articleData['pageText']])
 
 def main():    
     try:
-        con = lite.connect('WikipediaPowerPlants.db')
+        # isolation_level enables auto commit http://stackoverflow.com/questions/22488763/sqlite-insert-query-not-working-with-python
+        con = lite.connect('WikipediaPowerPlants.db', isolation_level=None)
     
         # This works for the english language Wikipedia
         # What's going on here is that the query does a (massive) hierarchical category traversal, 
@@ -168,6 +171,10 @@ def main():
         sys.exit(1)
         
     finally:
+        print "final check:"        
+        cur.execute("select revisionID from PowerPlantArticles where pageID = 2436490")
+        print "after updating pageID 2436490, revid is:", cur.fetchone()
+        
         con.commit()
         cur.close()
         con.close()
