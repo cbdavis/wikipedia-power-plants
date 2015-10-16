@@ -170,11 +170,7 @@ def main():
         print "Error %s:" % e.args[0]
         sys.exit(1)
         
-    finally:
-        print "final check:"        
-        cur.execute("select revisionID from PowerPlantArticles where pageID = 2436490")
-        print "after updating pageID 2436490, revid is:", cur.fetchone()
-        
+    finally:        
         con.commit()
         cur.close()
         con.close()
