@@ -132,7 +132,7 @@ def downloadDataAndInsertIntoDatabase(pageID, cursor, overwrite=False):
 def main():    
     
     defaultDirectory = "./API_Responses/en/"
-    if not os.path.exists():
+    if not os.path.exists(defaultDirectory):
         os.makedirs(defaultDirectory)    
     
     try:
