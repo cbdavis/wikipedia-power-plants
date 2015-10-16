@@ -130,6 +130,11 @@ def downloadDataAndInsertIntoDatabase(pageID, cursor, overwrite=False):
             cursor.execute("INSERT INTO PowerPlantArticles VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [articleData['pageID'], articleData['revisionID'], articleData['title'], articleData['language'], articleData['timeStamp'], articleData['latitude'], articleData['longitude'], articleData['pageText']])
 
 def main():    
+    
+    defaultDirectory = "./API_Responses/en/"
+    if not os.path.exists():
+        os.makedirs(defaultDirectory)    
+    
     try:
         # isolation_level enables auto commit http://stackoverflow.com/questions/22488763/sqlite-insert-query-not-working-with-python
         con = lite.connect('WikipediaPowerPlants.db', isolation_level=None)
