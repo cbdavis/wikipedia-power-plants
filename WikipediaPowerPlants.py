@@ -181,6 +181,8 @@ def main():
         con.close()
             
 
+# change to the directory which this code is in
+os.chdir(sys.path[0])
 main()
 
 ##### SQL queries for debugging
